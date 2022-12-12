@@ -16,7 +16,7 @@ public class Api extends Construct {
     private String ecsTaskExecutionRole = null;
     private String appURL = null;
     
-    public Api(final Construct scope, final String id, final String deploymentConfig){
+    public Api(final Construct scope, final String id, final String deploymentConfig, final String cidr){
 
         super(scope, id);
         String strEnvType   =   id.split("Api")[id.split("Api").length-1];
@@ -28,7 +28,8 @@ public class Api extends Construct {
         Network ecsNetwork = new Network(
             this, 
             "Network", 
-            APP_NAME );
+            APP_NAME,
+            cidr);
 
         ECS ecs = new ECS(
             this, 

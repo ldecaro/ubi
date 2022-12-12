@@ -44,7 +44,7 @@ public class Pipeline extends Construct {
             gitBranch);
     }
 
-    public Pipeline addStage(final String stageName, final String deployConfig, final String account, final String region, final Boolean ADD_APPROVAL ) {
+    public Pipeline addStage(final String stageName, final String deployConfig, final String cidr, final String account, final String region, final Boolean ADD_APPROVAL ) {
 
         Environment env = Environment.builder().region(region).account(account).build();
 
@@ -56,6 +56,7 @@ public class Pipeline extends Construct {
             deployStage, 
             "CdkFargateBg"+stageName,
             deployConfig,
+            cidr,
             StackProps.builder()
                 .stackName(Constants.APP_NAME+stageName)
                 .description(Constants.APP_NAME+"-"+stageName)
@@ -108,9 +109,9 @@ public class Pipeline extends Construct {
         return this;
     }
 
-    public Pipeline addStage(final String stageName, final String deployConfig, String account, String region) {
+    public Pipeline addStage(final String stageName, final String deployConfig, final String cidr, String account, String region) {
 
-        return addStage(stageName, deployConfig, account, region, Boolean.FALSE);
+        return addStage(stageName, deployConfig, cidr, account, region, Boolean.FALSE);
     }
 
     private List<String> configureCodeDeploy(final String stageName, String account, String region ){

@@ -16,7 +16,7 @@ public class Ubiquitous extends Stack {
     IEcsDeploymentGroup deploymentGroup = null;
     IRole codeDeployRole    =   null;
 
-    public Ubiquitous(Construct scope, String id, String deploymentConfig, StackProps props ){
+    public Ubiquitous(Construct scope, String id, String deploymentConfig, String cidr, StackProps props ){
         
         super(scope, id, props);
 
@@ -27,7 +27,8 @@ public class Ubiquitous extends Stack {
         Api example = new Api(
             this, 
             Constants.APP_NAME+"Api"+envType,
-            deploymentConfig);
+            deploymentConfig,
+            cidr);
          
     
         //In case the component has more resources, 

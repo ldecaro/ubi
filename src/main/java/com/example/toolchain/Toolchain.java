@@ -14,6 +14,10 @@ public class Toolchain extends Stack {
 
     public static final String COMPONENT_ACCOUNT        =   App.TOOLCHAIN_ACCOUNT;
     public static final String COMPONENT_REGION         =   App.TOOLCHAIN_REGION;
+    public static final String COMPONENT_CIDR           =   "10.0.0.0/24";
+
+    public static final String COMPONENT_REGION_DR      =   "us-east-2";
+    public static final String COMPONENT_CIDR_DR        =   "10.0.1.0/24";
 
     public Toolchain(final Construct scope, final String id, final StackProps props) throws Exception {
 
@@ -26,9 +30,17 @@ public class Toolchain extends Stack {
             Toolchain.CODECOMMIT_BRANCH);
 
         pipeline.addStage(
-            "UAT",
-            "CodeDeployDefault.ECSLinear10PercentEvery3Minutes",
+            "Prod",
+            "CodeDeployDefault.ECSLinear10PercentEvery1Minutes",
+            Toolchain.COMPONENT_CIDR,
             Toolchain.COMPONENT_ACCOUNT,
             Toolchain.COMPONENT_REGION);
+
+        pipeline.addStage(
+            "DR",
+            "CodeDeployDefault.ECSLinear10PercentEvery1Minutes",
+            Toolchain.COMPONENT_CIDR_DR,
+            Toolchain.COMPONENT_ACCOUNT,
+            Toolchain.COMPONENT_REGION);            
     }
 }

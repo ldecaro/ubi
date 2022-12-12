@@ -9,15 +9,30 @@ import software.constructs.Construct;
 public class Network extends Construct {
 
     Vpc vpc = null;
-    public Network (Construct scope, final String id, String appName){
+
+    /**
+     * 
+     * @param scope
+     * @param id
+     * @param appName
+     * @param cidr if cidr is null network will use a default cidr of 10.0.0.0/24
+     */
+    public Network (Construct scope, final String id, final String appName, final String cidr){
 
         super(scope,id);
+
+        String netAddr = "10.0.0.0/24";
+
+        if( cidr != null ){
+            netAddr = cidr;
+        }
 
         Vpc vpc = Vpc.Builder.create(this, appName+"VPC") 
             .maxAzs(2)
             .natGateways(1)
             .enableDnsHostnames(Boolean.TRUE)
-            .enableDnsSupport(Boolean.TRUE)            
+            .enableDnsSupport(Boolean.TRUE)
+            .cidr(netAddr)     
             .build();
     
         SecurityGroup sg    =   SecurityGroup.Builder.create(this, appName+"Sg")
