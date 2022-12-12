@@ -1,4 +1,4 @@
-package com.example.cdk_fargate_bg.network.infrastructure;
+package com.example.ubi.network.infrastructure;
 
 import software.amazon.awscdk.services.ec2.Peer;
 import software.amazon.awscdk.services.ec2.Port;

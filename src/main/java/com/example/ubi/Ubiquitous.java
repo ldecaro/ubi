@@ -1,7 +1,7 @@
-package com.example.cdk_fargate_bg;
+package com.example.ubi;
 
 import com.example.Constants;
-import com.example.cdk_fargate_bg.api.infrastructure.Api;
+import com.example.ubi.api.infrastructure.Api;
 
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Stack;
@@ -11,12 +11,12 @@ import software.amazon.awscdk.services.codedeploy.IEcsDeploymentGroup;
 import software.amazon.awscdk.services.iam.IRole;
 import software.constructs.Construct;
 
-public class CdkFargateBg extends Stack {
+public class Ubiquitous extends Stack {
 
     IEcsDeploymentGroup deploymentGroup = null;
     IRole codeDeployRole    =   null;
 
-    public CdkFargateBg(Construct scope, String id, String deploymentConfig, StackProps props ){
+    public Ubiquitous(Construct scope, String id, String deploymentConfig, StackProps props ){
         
         super(scope, id, props);
 

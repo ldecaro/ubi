@@ -1,8 +1,9 @@
-package com.example.cdk_fargate_bg.api.infrastructure;
+package com.example.ubi.api.infrastructure;
 
 import static com.example.Constants.APP_NAME;
-import com.example.cdk_fargate_bg.compute.infrastructure.ECS;
-import com.example.cdk_fargate_bg.network.infrastructure.Network;
+
+import com.example.ubi.compute.infrastructure.ECS;
+import com.example.ubi.network.infrastructure.Network;
 
 import software.amazon.awscdk.services.ecr.assets.DockerImageAsset;
 import software.constructs.Construct;

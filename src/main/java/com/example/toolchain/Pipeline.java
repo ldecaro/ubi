@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.example.Constants;
 import com.example.bootstrap.CodeDeployBootstrap;
-import com.example.cdk_fargate_bg.CdkFargateBg;
+import com.example.ubi.Ubiquitous;
 
 import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.Stack;
@@ -52,7 +52,7 @@ public class Pipeline extends Construct {
         Stage deployStage = Stage.Builder.create(pipeline, stageName).env(env).build();
 
         //My stack
-        new CdkFargateBg(
+        new Ubiquitous(
             deployStage, 
             "CdkFargateBg"+stageName,
             deployConfig,
@@ -76,7 +76,7 @@ public class Pipeline extends Construct {
                 .build());  
 
         IRole codeDeployRole  = Role.fromRoleArn(
-            new Stack(this, "ghost-stack-role-"+stageName, StackProps.builder().env(env).build()),
+            this,
             // component,
             "AWSCodeDeployRole"+stageName, 
             "arn:aws:iam::"+deploymentGroup.getEnv().getAccount()+":role/"+CodeDeployBootstrap.getRoleName());                   

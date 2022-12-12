@@ -1,4 +1,4 @@
-package com.example.cdk_fargate_bg.compute.infrastructure;
+package com.example.ubi.compute.infrastructure;
 
 import static com.example.Constants.APP_NAME;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.example.cdk_fargate_bg.network.infrastructure.Network;
+import com.example.ubi.network.infrastructure.Network;
 
 import software.amazon.awscdk.CustomResource;
 import software.amazon.awscdk.Duration;
