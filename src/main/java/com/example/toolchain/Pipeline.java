@@ -54,7 +54,7 @@ public class Pipeline extends Construct {
         //My stack
         new Ubiquitous(
             deployStage, 
-            "CdkFargateBg"+stageName,
+            Constants.APP_NAME+stageName,
             deployConfig,
             cidr,
             StackProps.builder()

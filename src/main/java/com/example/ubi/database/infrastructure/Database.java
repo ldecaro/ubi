@@ -17,7 +17,6 @@ import software.amazon.awscdk.services.rds.InstanceProps;
 import software.constructs.Construct;
 
 public class Database extends Construct {
-    
 
     DatabaseCluster cluster =   null;
     public Database(Construct scope, final String id, final Network dbNetwork){
@@ -26,7 +25,7 @@ public class Database extends Construct {
 
         cluster = DatabaseCluster.Builder.create(this, "UbiDatabase")
         .engine(DatabaseClusterEngine.auroraMysql(AuroraMysqlClusterEngineProps.builder().version(AuroraMysqlEngineVersion.VER_2_08_1).build()))
-        .credentials(Credentials.fromPassword("clusteradmin", SecretValue.unsafePlainText("welcome1")))
+        .credentials(Credentials.fromPassword( getDBUsername(), SecretValue.unsafePlainText(getDBPassword())))
         .instanceProps(InstanceProps.builder()
                 // optional , defaults to t3.medium
                 .instanceType(InstanceType.of(InstanceClass.BURSTABLE2, InstanceSize.SMALL))
@@ -36,5 +35,21 @@ public class Database extends Construct {
                 .vpc(dbNetwork.getVpc())
                 .build())
         .build();        
+    }
+
+    public String getDBEndpoint(){
+        return cluster.getClusterEndpoint().toString();
+    }
+
+    public String getDBReadEndpoint(){
+        return cluster.getClusterReadEndpoint().toString();
+    }
+
+    public String getDBUsername(){
+        return "clusteradmin";
+    }
+
+    public String getDBPassword(){
+        return "welcome1";
     }
 }

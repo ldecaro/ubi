@@ -58,7 +58,27 @@ public class Ubiquitous extends Stack {
         CfnOutput.Builder.create(this, "ApplicationURL")
             .description("Application is acessible from this url")
             .value(example.getAppURL())
-            .build();                             
+            .build();        
+            
+        CfnOutput.Builder.create(this, "DBEndpoint")
+            .description("Address of the Database Endpoint ")
+            .value(example.getDBEndpoint())
+            .build();            
+
+        CfnOutput.Builder.create(this, "DBEndpointRead")
+            .description("Address of the database Endpoint open for reads")
+            .value(example.getDBReadEndpoint())
+            .build();            
+
+        CfnOutput.Builder.create(this, "DBUsername")
+            .description("DB username")
+            .value(example.getDBUsername())
+            .build();              
+            
+        CfnOutput.Builder.create(this, "DBPassword")
+            .description("DB password")
+            .value(example.getDBPassword())
+            .build();              
     }
 
     public IRole getCodeDeployRole(){

@@ -16,7 +16,7 @@ public class Toolchain extends Stack {
     public static final String COMPONENT_REGION         =   App.TOOLCHAIN_REGION;
     public static final String COMPONENT_CIDR           =   "10.0.0.0/24";
 
-    public static final String COMPONENT_REGION_DR      =   "us-east-2";
+    public static final String COMPONENT_REGION_DR      =   "us-west-2";
     public static final String COMPONENT_CIDR_DR        =   "10.0.1.0/24";
 
     public Toolchain(final Construct scope, final String id, final StackProps props) throws Exception {
@@ -41,6 +41,6 @@ public class Toolchain extends Stack {
             "CodeDeployDefault.ECSLinear10PercentEvery1Minutes",
             Toolchain.COMPONENT_CIDR_DR,
             Toolchain.COMPONENT_ACCOUNT,
-            Toolchain.COMPONENT_REGION);            
+            Toolchain.COMPONENT_REGION_DR);            
     }
 }
