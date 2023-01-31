@@ -1,13 +1,10 @@
 package com.example.ubi.api.runtime;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -21,10 +18,13 @@ import jakarta.ws.rs.core.MediaType;
 public class ExampleResource {
 
     private static String HTML =   null;
+	private static DAO dao = null;
 
     public ExampleResource(){
-		if( ExampleResource.HTML == null )
-        	ExampleResource.HTML = getFile("com/example/cdk_fargate_bg/api/runtime/example.html");;
+		if( ExampleResource.HTML == null ){
+        	ExampleResource.HTML = getFile("com/example/ubi/api/runtime/example.html");
+			dao = new DAO();
+		}
     }
     
     /**
@@ -36,37 +36,62 @@ public class ExampleResource {
     @GET
 	@Produces(MediaType.TEXT_HTML)
     public String example() {
-        return ExampleResource.HTML;
+
+		String region = System.getenv("AWS_REGION");
+		Integer index =	0;
+		try{
+			if(region == null){
+				System.out.println("Region is not part of the environment. Using region us-east-1");
+				region = "us-east-1";
+			}
+			index = dao.keepalive(region);
+			System.out.println("Using index "+index);
+		}catch(Exception t){
+			System.out.println("Exception: "+t.getMessage());
+			t.printStackTrace();
+		}
+        return ExampleResource.HTML.replace("REGION", region).replace("INDEX", index+"");
     }	
+
+    /**
+     * Method handling HTTP GET requests. The returned object will be sent
+     * to the client as "text/plain" media type.
+     *
+     * @return String that will be returned as a text/plain response.
+     */
+    @GET
+	@Produces(MediaType.TEXT_HTML)
+	@Path("/demo")
+    public String demo() {
+
+		String region = System.getenv("AWS_REGION");
+		Integer index =	0;
+		try{
+			if(region == null){
+				System.out.println("Region is not part of the environment. Using region us-east-1");
+				region = "us-east-1";
+			}
+			index = dao.demo(region);
+			System.out.println("Using index "+index);
+		}catch(Exception t){
+			System.out.println("Exception: "+t.getMessage());
+			t.printStackTrace();
+		}
+        return ExampleResource.HTML.replace("REGION", region).replace("INDEX", index+"");
+    }		
 
     private String getFile(String filename) {
 		
-		byte[] bytes = null;
-        try {
-        	final Map<String, String> env = new HashMap<>();
-        	final String[] array = Thread.currentThread().getContextClassLoader().getResource(filename).toURI().toString().split("!");
-        	final FileSystem fs = FileSystems.newFileSystem(Thread.currentThread().getContextClassLoader().getResource(filename).toURI(), env);
-        	final java.nio.file.Path path = fs.getPath(array[1]);
-        	bytes = Files.readAllBytes( path );
-
-        }catch(IllegalArgumentException a) {
-        	try {
-        		bytes = Files.readAllBytes( Paths.get(this.getClass().getClassLoader().getResource(filename).toURI()));                	
-			} catch (URISyntaxException e) {
-				System.out.println("ExampleResource::Cannot HTML file "+filename+". URISyntaxException:"+e.getMessage());
-				e.printStackTrace();
-			} catch( IOException ioe) {
-				System.out.println("ExampleResource::Cannot HTML file "+filename+". IOException:"+ioe.getMessage());
-				ioe.printStackTrace();
-			}
-		} catch (URISyntaxException e) {
-			System.out.println("ExampleResource::Cannot HTMl file "+filename+". URISyntaxException:"+e.getMessage());
-			e.printStackTrace();
-		} catch( IOException ioe) {
+		byte[] bytes = null;		
+		try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+			// Use resource
+			final String fileAsText = reader.lines().collect(Collectors.joining());
+			return fileAsText;
+		}catch( IOException ioe) {
 			System.out.println("ExampleResource::Cannot HTML file "+filename+". IOException:"+ioe.getMessage());
 			ioe.printStackTrace();
+			return "";
 		}
-        String fileContent	=	new String(bytes);
-        return fileContent;
-	}    	
+	}
 }

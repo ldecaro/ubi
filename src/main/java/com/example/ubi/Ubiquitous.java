@@ -1,14 +1,18 @@
 package com.example.ubi;
 
+import java.util.stream.Collectors;
+
 import com.example.Constants;
 import com.example.ubi.api.infrastructure.Api;
 
 import software.amazon.awscdk.CfnOutput;
+import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.Stage;
 import software.amazon.awscdk.services.codedeploy.IEcsDeploymentGroup;
 import software.amazon.awscdk.services.iam.IRole;
+import software.amazon.awscdk.services.ssm.StringParameter;
 import software.constructs.Construct;
 
 public class Ubiquitous extends Stack {
@@ -29,12 +33,59 @@ public class Ubiquitous extends Stack {
             Constants.APP_NAME+"Api"+envType,
             deploymentConfig,
             cidr);
-         
-    
-        //In case the component has more resources, 
-        //ie. a dynamo table, a lambda implementing a dynamo stream and a monitoring capability
-        //they should be added here, as part of the component
 
+        //exporting properties to configure Route53 for Recovery.
+        //ALB
+        StringParameter.Builder.create(this, Constants.APP_NAME+"SSM-ALB")
+            .parameterName(Constants.SSM_ELB_ENDPOINT)
+            .description("The ELB of the application "+Constants.APP_NAME)
+            .stringValue( example.getAlbEndpoint() )
+            .build();
+
+        StringParameter.Builder.create(this, Constants.APP_NAME+"SSM-ALB-ARN")
+            .parameterName(Constants.SSM_ELB_ENDPOINT_ARN)
+            .description("The ELB Arn of the application "+Constants.APP_NAME)
+            .stringValue( example.getAlbEndpointArn() )
+            .build();        
+            
+        StringParameter.Builder.create(this, Constants.APP_NAME+"SSM-ALB-SG")
+            .parameterName(Constants.SSM_ELB_ENDPOINT_SG)
+            .description("The SG Id of the application "+Constants.APP_NAME)
+            .stringValue( Fn.select(0, example.getAlbSecurityGroups()) )
+            .build();                
+
+        StringParameter.Builder.create(this, Constants.APP_NAME+"SSM-ALB-HostedZoneId")
+            .parameterName(Constants.SSM_ELB_ENDPOINT_ZONEID)
+            .description("The Hosted Zone Id of Elb of the application "+Constants.APP_NAME)
+            .stringValue( example.getAlbHostedZoneId() )
+            .build();                        
+
+        //Database
+        StringParameter.Builder.create(this, Constants.APP_NAME+"SSM-DB")
+            .parameterName(Constants.SSM_DB_ENDPOINT)
+            .description("The DB of the application "+Constants.APP_NAME)
+            .stringValue( example.getDBEndpoint() )
+            .build();
+
+        StringParameter.Builder.create(this, Constants.APP_NAME+"SSM-DBREAD")
+            .parameterName(Constants.SSM_DB_ENDPOINT_READ)
+            .description("The DB Read of the application "+Constants.APP_NAME)
+            .stringValue( example.getDBReadEndpoint() )
+            .build();
+
+        StringParameter.Builder.create(this, Constants.APP_NAME+"VPC-ID")
+            .parameterName(Constants.SSM_VPC_ID)
+            .description("The VPC of the application "+Constants.APP_NAME)
+            .stringValue( example.getNetwork().getVpc().getVpcId() )
+            .build();   
+
+        StringParameter.Builder.create(this, Constants.APP_NAME+"VPC-AZs")
+            .parameterName(Constants.SSM_VPC_AZS)
+            .description("The VPC AZs of the application "+Constants.APP_NAME)
+            .stringValue( example.getNetwork().getVpc().getAvailabilityZones().stream().collect(Collectors.joining(",")) )
+            .build();                  
+        
+            
         CfnOutput.Builder.create(this, "VPC")
             .description("Arn of the VPC ")
             .value(example.getVpcArn())

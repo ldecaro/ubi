@@ -6,6 +6,7 @@ import software.amazon.awscdk.SecretValue;
 import software.amazon.awscdk.services.ec2.InstanceClass;
 import software.amazon.awscdk.services.ec2.InstanceSize;
 import software.amazon.awscdk.services.ec2.InstanceType;
+import software.amazon.awscdk.services.ec2.Peer;
 import software.amazon.awscdk.services.ec2.SubnetSelection;
 import software.amazon.awscdk.services.ec2.SubnetType;
 import software.amazon.awscdk.services.rds.AuroraMysqlClusterEngineProps;
@@ -24,9 +25,9 @@ public class Database extends Construct {
         super(scope, id);
 
         cluster = DatabaseCluster.Builder.create(this, "UbiDatabase")
-        .engine(DatabaseClusterEngine.auroraMysql(AuroraMysqlClusterEngineProps.builder().version(AuroraMysqlEngineVersion.VER_2_08_1).build()))
-        .credentials(Credentials.fromPassword( getDBUsername(), SecretValue.unsafePlainText(getDBPassword())))
-        .instanceProps(InstanceProps.builder()
+            .engine(DatabaseClusterEngine.auroraMysql(AuroraMysqlClusterEngineProps.builder().version(AuroraMysqlEngineVersion.VER_2_08_1).build()))
+            .credentials(Credentials.fromPassword( getDBUsername(), SecretValue.unsafePlainText(getDBPassword())))
+            .instanceProps(InstanceProps.builder()
                 // optional , defaults to t3.medium
                 .instanceType(InstanceType.of(InstanceClass.BURSTABLE2, InstanceSize.SMALL))
                 .vpcSubnets(SubnetSelection.builder()
@@ -34,15 +35,17 @@ public class Database extends Construct {
                         .build())
                 .vpc(dbNetwork.getVpc())
                 .build())
-        .build();        
+        .build();
+
+        cluster.getConnections().allowDefaultPortFrom(Peer.ipv4(dbNetwork.getVpc().getVpcCidrBlock()));
     }
 
     public String getDBEndpoint(){
-        return cluster.getClusterEndpoint().toString();
+        return cluster.getClusterEndpoint().getHostname();
     }
 
     public String getDBReadEndpoint(){
-        return cluster.getClusterReadEndpoint().toString();
+        return cluster.getClusterReadEndpoint().getHostname();
     }
 
     public String getDBUsername(){
@@ -51,5 +54,9 @@ public class Database extends Construct {
 
     public String getDBPassword(){
         return "welcome1";
+    }
+
+    public DatabaseCluster getDBCluster(){
+        return cluster;
     }
 }

@@ -2,6 +2,7 @@ package com.example;
 
 import com.example.bootstrap.CodeDeployBootstrap;
 import com.example.toolchain.Toolchain;
+import com.example.ubi.UbiquitousDR;
 
 import software.amazon.awscdk.Aws;
 import software.amazon.awscdk.Environment;
@@ -21,8 +22,8 @@ import software.amazon.awscdk.StackProps;
  */
 public class App extends software.amazon.awscdk.App {
 
-    public static final String TOOLCHAIN_ACCOUNT             = "123456789012";
-    public static final String TOOLCHAIN_REGION              = "us-east-1";
+    public static final String TOOLCHAIN_ACCOUNT             = "587929909912";
+    public static final String TOOLCHAIN_REGION              = "us-east-2";
 
     public static void main(String args[]) throws Exception {
 
@@ -49,6 +50,27 @@ public class App extends software.amazon.awscdk.App {
                 .build());
 
         app.synth();
+
+        //My Stack
+        new UbiquitousDR(
+                app, 
+                Constants.APP_NAME+"DisasterRecovery",
+                Environment.builder()
+                    .account(Toolchain.COMPONENT_ACCOUNT)
+                    .region(Toolchain.COMPONENT_REGION)
+                    .build(),
+                Environment.builder()
+                    .account(Toolchain.COMPONENT_ACCOUNT)
+                    .region(Toolchain.COMPONENT_REGION_DR)
+                    .build(),
+                StackProps.builder()
+                    .stackName(Constants.APP_NAME+"DisasterRecovery")
+                    .description(Constants.APP_NAME+"-DisasterRecovery")
+                    .env(Environment.builder()
+                        .account(Toolchain.COMPONENT_ACCOUNT)
+                        .region(Toolchain.COMPONENT_REGION_DR)
+                        .build())
+                    .build());
     }
 
     public static Environment toolchainEnv(){

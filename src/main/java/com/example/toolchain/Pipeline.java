@@ -1,11 +1,13 @@
 package com.example.toolchain;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.example.Constants;
 import com.example.bootstrap.CodeDeployBootstrap;
 import com.example.ubi.Ubiquitous;
+import com.example.ubi.UbiquitousDR;
 
 import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.Stack;
@@ -32,8 +34,10 @@ public class Pipeline extends Construct {
 
     public static final Boolean CONTINUOUS_DELIVERY       = Boolean.TRUE;
     public static final Boolean CONTINUOUS_DEPLOYMENT       = Boolean.FALSE;
-    
+
     private CodePipeline pipeline   =   null;
+
+    private List<Environment> environments = new ArrayList<>();
 
     public Pipeline(Construct scope, final String id, final String gitRepoURL, final String gitBranch){
 
@@ -47,21 +51,24 @@ public class Pipeline extends Construct {
     public Pipeline addStage(final String stageName, final String deployConfig, final String cidr, final String account, final String region, final Boolean ADD_APPROVAL ) {
 
         Environment env = Environment.builder().region(region).account(account).build();
+        environments.add(env);
 
         //The stage
         Stage deployStage = Stage.Builder.create(pipeline, stageName).env(env).build();
 
-        //My stack
-        new Ubiquitous(
-            deployStage, 
-            Constants.APP_NAME+stageName,
-            deployConfig,
-            cidr,
-            StackProps.builder()
-                .stackName(Constants.APP_NAME+stageName)
-                .description(Constants.APP_NAME+"-"+stageName)
-                .build());
-
+        //My Stack
+        Ubiquitous ubi =    new Ubiquitous(
+                deployStage, 
+                Constants.APP_NAME+stageName,
+                deployConfig,
+                cidr,
+                StackProps.builder()
+                    .stackName(Constants.APP_NAME+stageName)
+                    .description(Constants.APP_NAME+"-"+stageName)
+                    .build());
+        
+        
+        
         IEcsDeploymentGroup deploymentGroup  =  EcsDeploymentGroup.fromEcsDeploymentGroupAttributes(
             //cannot associate the scope with the CdkFargateBg stack as dependencies cannot cross stage boundaries.
             new Stack(this, "ghost-stack-codedeploy-dg-"+stageName, StackProps.builder().env(env).build()), 
@@ -109,6 +116,34 @@ public class Pipeline extends Construct {
         return this;
     }
 
+    public Pipeline prevail(){
+
+        if( this.environments == null || this.environments.size() < 2 ){
+            throw new RuntimeException("cannot call prevail() before adding at least 2 stages (addStages())");
+        }
+
+        //the stages
+        Environment env = environments.get(environments.size()-2);
+        Environment envDR = environments.get(environments.size()-1);
+
+        //The stage
+        Stage deployStage = Stage.Builder.create(pipeline,Constants.APP_NAME+"DisasterRecovery").env( envDR ).build();
+        
+        //My Stack
+        new UbiquitousDR(
+                deployStage, 
+                Constants.APP_NAME+"DisasterRecovery",
+                env,
+                envDR,
+                StackProps.builder()
+                    .stackName(Constants.APP_NAME+"DisasterRecovery")
+                    .description(Constants.APP_NAME+"-DisasterRecovery")
+                    .build());        
+        
+        pipeline.addStage(deployStage);
+        return this;
+    }
+
     public Pipeline addStage(final String stageName, final String deployConfig, final String cidr, String account, String region) {
 
         return addStage(stageName, deployConfig, cidr, account, region, Boolean.FALSE);
@@ -123,7 +158,7 @@ public class Pipeline extends Construct {
             "ls -l",
             "ls -l codedeploy",
             "repo_name=$(cat assembly*"+pipelineId+"-"+stageName+"/*.assets.json | jq -r '.dockerImages[] | .destinations[] | .repositoryName' | head -1)",
-            "tag_name=$(cat assembly*"+pipelineId+"-"+stageName+"/*.assets.json | jq -r '.dockerImages | keys[0]')",
+            "tag_name=$(cat assembly*"+pipelineId+"-"+stageName+"/*.assets.json | jq -r '.dockerImages | keys | to_entries | first.value')",
             "echo ${repo_name}",
             "echo ${tag_name}",
             "printf '{\"ImageURI\":\"%s\"}' \""+account+".dkr.ecr."+region+".amazonaws.com/${repo_name}:${tag_name}\" > codedeploy/imageDetail.json",                    

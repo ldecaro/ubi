@@ -31,16 +31,18 @@ public class Toolchain extends Stack {
 
         pipeline.addStage(
             "Prod",
-            "CodeDeployDefault.ECSLinear10PercentEvery1Minutes",
+            "CodeDeployDefault.ECSCanary10Percent5Minutes",
             Toolchain.COMPONENT_CIDR,
             Toolchain.COMPONENT_ACCOUNT,
             Toolchain.COMPONENT_REGION);
 
         pipeline.addStage(
             "DR",
-            "CodeDeployDefault.ECSLinear10PercentEvery1Minutes",
+            "CodeDeployDefault.ECSCanary10Percent5Minutes",
             Toolchain.COMPONENT_CIDR_DR,
             Toolchain.COMPONENT_ACCOUNT,
-            Toolchain.COMPONENT_REGION_DR);            
+            Toolchain.COMPONENT_REGION_DR);  
+            
+        pipeline.prevail();
     }
 }

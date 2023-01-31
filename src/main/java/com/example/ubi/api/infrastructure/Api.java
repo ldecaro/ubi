@@ -2,6 +2,8 @@ package com.example.ubi.api.infrastructure;
 
 import static com.example.Constants.APP_NAME;
 
+import java.util.List;
+
 import com.example.ubi.compute.infrastructure.ECS;
 import com.example.ubi.database.infrastructure.Database;
 import com.example.ubi.network.infrastructure.Network;
@@ -21,6 +23,9 @@ public class Api extends Construct {
     private String dbEndpointRead = null;
     private String dbUsername = null;
     private String dbPassword = null;
+
+    private Network network = null;
+    private ECS ecs =   null;
     
     public Api(final Construct scope, final String id, final String deploymentConfig, final String cidr){
 
@@ -45,7 +50,7 @@ public class Api extends Construct {
             network); 
 
         Database db =   new Database(this, "UbiDatabase", network);
-        
+
         this.vpcArn =   network.getVpc().getVpcArn();
         this.ecsClusterName = ecs.getCluster().getClusterName();
         this.ecsTaskRole = ecs.getTaskRole().getRoleName();
@@ -55,7 +60,9 @@ public class Api extends Construct {
         this.dbEndpoint = db.getDBEndpoint();
         this.dbEndpointRead = db.getDBReadEndpoint();
         this.dbUsername = db.getDBUsername();
-        this.dbPassword = db.getDBPassword();
+        this.dbPassword = db.getDBPassword();     
+        this.network = network; 
+        this.ecs    =   ecs;
     }
 
     public String getVpcArn(){
@@ -92,5 +99,25 @@ public class Api extends Construct {
 
     public String getDBPassword(){
         return this.dbPassword;
+    }
+
+    public Network getNetwork(){
+        return network;
+    }
+
+    public String getAlbEndpoint(){
+        return ecs.getALB().getLoadBalancerDnsName();
+    }
+
+    public String getAlbEndpointArn(){
+        return ecs.getALB().getLoadBalancerArn();
+    }    
+
+    public List<String> getAlbSecurityGroups(){
+        return ecs.getALB().getLoadBalancerSecurityGroups();
+    }        
+
+    public String getAlbHostedZoneId(){
+        return ecs.getALB().getLoadBalancerCanonicalHostedZoneId();
     }
 }
