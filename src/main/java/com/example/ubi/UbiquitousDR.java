@@ -3,9 +3,9 @@ package com.example.ubi;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import com.example.Constants;
+import com.example.ubi.monitoring.infrastructure.Monitor;
 
 import software.amazon.awscdk.Arn;
 import software.amazon.awscdk.ArnComponents;
@@ -109,6 +109,9 @@ public class UbiquitousDR extends Stack {
             !PRIMARY);           
         
         //Add the replication task using DMS
+
+        //Adding the synthetic monitoring of the application in the first region...
+        new Monitor(this, Constants.APP_NAME+"Monitor", "http://"+elbEndpoint+"/");
     }
 
     private CnameRecord createCNAME(String recordName, String endpoint, PrivateHostedZone phz){
